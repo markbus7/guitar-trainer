@@ -4,6 +4,7 @@ import { progressData, useProgress } from '../../state/progress';
 import { Icon } from '../components/Icon';
 import { Bar } from '../components/Stars';
 import { LogoMark } from '../components/Logo';
+import { APP_VERSION } from '../../version';
 
 export function ProfileScreen() {
   useProgress((s) => s.lessons);
@@ -96,6 +97,7 @@ export function ProfileScreen() {
           ))}
         </ol>
       </section>
+      <p className="app-version faint small">Fretforge v{APP_VERSION}</p>
     </div>
   );
 }

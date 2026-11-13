@@ -13,6 +13,7 @@ import { useMicEvents, useMicStatus } from '../hooks';
 import { toast } from '../toasts';
 import { connectGitHub, disconnectGitHub, syncNow, useSync } from '../../state/sync';
 import { TOKEN_URL } from '../../sync/gist';
+import { APP_BUILT, APP_COMMIT, APP_VERSION } from '../../version';
 
 export function SettingsScreen() {
   const s = useSettings();
@@ -228,6 +229,11 @@ export function SettingsScreen() {
           Fretforge runs entirely in your browser. Your microphone audio is analysed on this device and never recorded or uploaded. Progress is saved in this browser, and in your own private gist if you turn on sync.
         </p>
       </section>
+
+      <p className="app-version faint small">
+        Fretforge v{APP_VERSION} · build {APP_COMMIT}
+        {APP_BUILT && ` · ${APP_BUILT}`}
+      </p>
 
       {calibrating && <Calibration onClose={() => setCalibrating(false)} />}
       {confirmReset && (

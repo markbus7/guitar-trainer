@@ -78,6 +78,13 @@ Walkthroughs teach a new idea step by step and listen while you try it. Drills (
 
 Fretforge runs entirely in your browser. Microphone audio is analysed on your device and is never recorded or uploaded. Progress is saved in your browser's local storage (and in your own private gist if you turn on sync).
 
+## Versions
+
+The version is shown at the bottom of **Settings** and **Profile** (with the build). Bump `version` in `package.json` for every release.
+
+- **1.1.0:** Free play with 19 new songs, My tabs (paste tabs and chord sheets) and GitHub gist sync.
+- **1.0.0:** the tour: nine venues, 56 lessons, 12 songs, tuner and chord library.
+
 ## For developers
 
 ```bash
