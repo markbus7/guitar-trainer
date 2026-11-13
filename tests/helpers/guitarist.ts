@@ -53,7 +53,7 @@ function midiToFreq(m: number) {
 }
 
 /** Additive string model with a pitch glide, used for bends and slides. */
-function renderGlide(sr: number, f0: number, f1: number, glideStart: number, glideTime: number, dur: number, vel: number) {
+function renderGlide(sr: number, f0: number, f1: number, glideStart: number, glideTime: number, dur: number, vel: number, soft = false) {
   const len = Math.round(dur * sr);
   const out = new Float32Array(len);
   const H = 10;
@@ -67,9 +67,10 @@ function renderGlide(sr: number, f0: number, f1: number, glideStart: number, gli
       phases[h - 1] += (2 * Math.PI * f * h) / sr;
       s += (Math.sin(phases[h - 1]) / h) * Math.exp(-t * (1.2 + h * 0.6));
     }
-    const attack = Math.min(1, t / 0.003);
+    const attack = Math.min(1, t / (soft ? 0.02 : 0.003));
     out[n] = s * vel * 0.5 * attack;
   }
+  if (soft) return out;
   // Pick click
   const rng = mulberry32(Math.floor(f0));
   for (let n = 0; n < Math.min(len, Math.round(sr * 0.004)); n++) out[n] += (rng() * 2 - 1) * vel * 0.4 * (1 - n / (sr * 0.004));
@@ -90,12 +91,13 @@ export function renderPerformance(notes: PlayedNote[], opts: RenderOptions): Flo
     if (n.bend || n.slideFrom !== undefined) {
       const f0 = midiToFreq(n.slideFrom ?? n.midi);
       const f1 = midiToFreq(n.midi + (n.bend ?? 0));
-      buf = renderGlide(sr, f0, f1, n.bend ? 0.08 : 0.0, n.bend ? 0.16 : 0.05, dur + 0.3, n.velocity ?? 0.7);
+      const soft = !!n.legato && n.slideFrom !== undefined;
+      buf = renderGlide(sr, f0, f1, n.bend ? 0.08 : 0.0, n.bend ? 0.16 : 0.05, dur + 0.3, (n.velocity ?? 0.7) * (soft ? 0.7 : 1), soft);
     } else {
       buf = renderPluck({
         sampleRate: sr,
         freq: midiToFreq(n.midi),
-        duration: dur + (n.mute ? 0 : 0.5),
+        duration: dur + 0.03,
         velocity: (n.velocity ?? 0.7) * (n.legato ? 0.55 : 1),
         brightness: n.legato ? 0.15 : 0.55 + rng() * 0.35,
         mute: n.mute,

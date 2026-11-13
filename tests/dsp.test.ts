@@ -57,7 +57,8 @@ describe('Analyzer: onsets and notes', () => {
   for (const sr of [48000, 44100]) {
     it(`detects a riff note by note at ${sr} Hz`, () => {
       const riff = [40, 40, 43, 40, 45, 43, 40, 47, 45, 52, 50, 45];
-      const notes = riff.map((midi, i) => ({ t: 0.5 + i * 0.25, midi, dur: 0.25 }));
+      // Each note keeps ringing well into the next ones, as on a real guitar.
+      const notes = riff.map((midi, i) => ({ t: 0.5 + i * 0.25, midi, dur: 0.8 }));
       const audio = renderPerformance(notes, { sampleRate: sr, duration: 4 });
       // The game sets the lowest expected pitch from the tuning (standard: just under E2).
       const events = analyze(audio, sr, { minFreq: 75 });

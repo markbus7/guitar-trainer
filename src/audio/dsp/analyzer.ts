@@ -262,13 +262,13 @@ export class Analyzer {
     const end = Math.min(p.end, this.nowFrame());
     const fullLen = p.end - p.start;
     if (early && end - p.start < fullLen * 0.45) {
-      this.tracker.onAttack(p.t, null, this.onset.gateDb, (e) => this.out.push(e));
+      this.tracker.onAttack(p.t, null, (e) => this.out.push(e));
       return;
     }
     const pre = this.segment(Math.max(p.preStart, this.nowFrame() - FULL_RING + 1), p.preEnd);
     const post = this.segment(p.start, end);
     const res = analyzeAttack(pre, post, this.cfg.sampleRate, { minMidi: this.minMidi, maxMidi: 90 });
-    this.tracker.onAttack(p.t, res, this.onset.gateDb, (e) => this.out.push(e));
+    this.tracker.onAttack(p.t, res, (e) => this.out.push(e));
   }
 
   private checkChroma(force: boolean) {
@@ -343,6 +343,8 @@ interface PendingNote {
   freqs: number[];
   clar: number[];
   resolved: boolean;
+  /** What was already ringing just before the pluck (if anything). */
+  before: number | null;
 }
 
 /** Turns onsets, the pitch track and attack analysis into discrete note events. */
@@ -356,7 +358,8 @@ class NoteTracker {
 
   onOnset(t: number, emit: Emit) {
     if (this.pending && !this.pending.resolved) this.decide(this.pending, null, emit);
-    this.pending = { t, midis: [], freqs: [], clar: [], resolved: false };
+    const before = this.silent < 3 && this.stable && this.stable.count >= 2 ? this.stable.midi : null;
+    this.pending = { t, midis: [], freqs: [], clar: [], resolved: false, before };
     this.stable = null;
   }
 
@@ -368,8 +371,12 @@ class NoteTracker {
         p.freqs.push(f.freq);
         p.clar.push(f.clarity);
         const n = p.midis.length;
-        // Fast path: a clean, confident single note.
-        if (n >= 2 && p.midis[n - 1] === p.midis[n - 2] && p.clar[n - 1] >= 0.85 && p.clar[n - 2] >= 0.85) {
+        // Fast path: a clean, confident single note. If it is the same note that was
+        // already ringing before the pluck, YIN may just be hearing the old string, so
+        // wait for the attack analysis to confirm.
+        const m = p.midis[n - 1];
+        const sameAsBefore = p.before !== null && (m === p.before || Math.abs(m - p.before) === 12);
+        if (n >= 2 && !sameAsBefore && p.midis[n - 2] === m && p.clar[n - 1] >= 0.85 && p.clar[n - 2] >= 0.85) {
           p.resolved = true;
           this.emitNote(emit, p.t, p.midis[n - 1], (p.freqs[n - 1] + p.freqs[n - 2]) / 2, p.clar[n - 1], false);
           this.stable = { midi: p.midis[n - 1], count: 2, t: p.t };
@@ -402,10 +409,12 @@ class NoteTracker {
     }
   }
 
-  onAttack(t: number, res: { candidates: AttackCandidate[]; addedDb: number } | null, gateDb: number, emit: Emit) {
+  onAttack(t: number, res: { candidates: AttackCandidate[]; newFraction: number } | null, emit: Emit) {
     const p = this.pending;
     if (!p || p.t !== t || p.resolved) return;
-    this.decide(p, res && res.addedDb > gateDb - 12 ? res : null, emit);
+    // When the pluck barely changed the spectrum (a re-pick of a ringing note), the
+    // difference is mostly noise: fall back to the pitch track alone.
+    this.decide(p, res && res.newFraction >= 0.02 ? res : null, emit);
   }
 
   private yinVote(p: PendingNote): { midi: number; freq: number; clarity: number } | null {

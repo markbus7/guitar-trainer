@@ -19,6 +19,8 @@ export interface AttackResult {
   candidates: AttackCandidate[];
   /** Level of what was newly added (dB, relative to full scale). */
   addedDb: number;
+  /** Share of the post-pluck spectrum energy that is new (0..1). */
+  newFraction: number;
 }
 
 const ffts = new Map<number, FFT>();
@@ -66,11 +68,13 @@ export function analyzeAttack(
   const half = n / 2;
   const diff = new Float64Array(half);
   let addedPow = 0;
+  let postPow = 0;
   for (let k = 0; k < half; k++) {
     // A ringing string decays, so its "before" level over-estimates it — good.
     const d = post0[k] - pre0[k] * 1.05;
     diff[k] = d > 0 ? d : 0;
     addedPow += diff[k] * diff[k];
+    postPow += post0[k] * post0[k];
   }
   const binHz = sampleRate / n;
 
@@ -115,6 +119,7 @@ export function analyzeAttack(
   peaks.sort((a, b) => b.score - a.score);
   return {
     candidates: peaks.slice(0, opts.top ?? 6),
-    addedDb: 10 * Math.log10(addedPow / Math.max(1, half) + 1e-14),
+    addedDb: 10 * Math.log10(addedPow + 1e-14),
+    newFraction: postPow > 0 ? addedPow / postPow : 0,
   };
 }
