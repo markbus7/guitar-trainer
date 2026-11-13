@@ -1,0 +1,11 @@
+{
+  "name": "Fretforge",
+  "short_name": "Fretforge",
+  "description": "Learn guitar with rock, pop-punk and metal riffs. It listens to you play.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c0a0f",
+  "theme_color": "#0c0a0f",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
