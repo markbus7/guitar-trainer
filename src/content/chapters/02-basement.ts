@@ -181,6 +181,8 @@ export const basement: Chapter = {
       title: 'Basement Tapes',
       kind: 'song',
       style: 'Hard rock',
+      genre: 'rock',
+      level: 1,
       summary: 'Gig night: your two riffs, a chorus and the band at full volume.',
       skills: ['riffs'],
       bpm: 100,

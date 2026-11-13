@@ -2,11 +2,11 @@
 
 **Forge your sound.** A guitar learning game for rock, pop-punk and metal. It listens to you play through your microphone, scores every note, and takes you from your first open string to full songs with a band.
 
-Everything is original: the venues, the art, the lessons and all twelve songs were written for Fretforge.
+Everything is original: the venues, the art, the lessons and all 31 songs were written for Fretforge.
 
 ## Play it
 
-- **Online:** https://markbus7.github.io/guitar-trainer/ (after GitHub Pages is switched on, see [Deploying](#deploying)).
+- **Online:** https://markbus7.github.io/guitar-trainer/
 - **On your own computer:** install [Node.js](https://nodejs.org) 22 or newer, then run:
 
   ```bash
@@ -39,6 +39,18 @@ Nine venues, from the garage to the main stage. Each one ends with a gig: an ori
 | 8 | The Arena | Alternate picking, tremolo picking, Drop D, syncopation |
 | 9 | Main Stage | Four encore songs that put it all together |
 
+## Free play
+
+Don't feel like following the tour? The **Free play** tab opens every song straight away.
+
+- **Songs:** 19 songbook songs plus the 12 tour gigs, in pop-punk, punk, rock, blues, metal and acoustic, from level 1 (first weeks) to 5. Filter by style and level, search, and sort.
+- **Riffs:** the short riffs from the tour, always open.
+- **My tabs:** paste a tab or chord sheet you found online and play it on the highway with drums and scoring. Six-line ASCII tab (with bar lines, hammer-ons, pull-offs, slides, bends, palm-mute lines, repeats, capo and tuning notes) and lines of chord names both work. Tab doesn't say how long notes last, so the rhythm is a best guess: start in Practice mode.
+
+## Sync across devices
+
+**Settings → Sync across devices** keeps stars, XP, streak, achievements and your own tabs the same on all your devices. [Create a GitHub token](https://github.com/settings/tokens/new?scopes=gist&description=Fretforge%20sync) with only the `gist` scope, paste it and connect; do the same on your other devices. Fretforge stores everything in one private gist on your account. The token stays in that browser's local storage and is only sent to api.github.com. Merging keeps the best of both devices, so syncing never loses stars.
+
 ### Ways to play a lesson
 
 - **Practice:** the notes wait for you. No band and no rush. Tap **Hear it** to hear the target, or **Skip**. Earns 1 star.
@@ -46,7 +58,7 @@ Nine venues, from the garage to the main stage. Each one ends with a gig: an ori
 - **Listen:** hear and watch how it goes before you try it.
 - **Speed:** 50%, 70%, 85% or 100% of the song tempo.
 
-Walkthroughs teach a new idea step by step and listen while you try it. Drills (like one-minute chord changes) build speed. XP, ten ranks from Rookie to Fretforge Legend, a daily goal, a streak and 17 achievements keep you coming back.
+Walkthroughs teach a new idea step by step and listen while you try it. Drills (like one-minute chord changes) build speed. XP, ten ranks from Rookie to Fretforge Legend, a daily goal, a streak and 19 achievements keep you coming back.
 
 ### Tools
 
@@ -64,7 +76,7 @@ Walkthroughs teach a new idea step by step and listen while you try it. Drills (
 
 ### Privacy
 
-Fretforge runs entirely in your browser. Microphone audio is analysed on your device and is never recorded or uploaded. Progress is saved in your browser's local storage.
+Fretforge runs entirely in your browser. Microphone audio is analysed on your device and is never recorded or uploaded. Progress is saved in your browser's local storage (and in your own private gist if you turn on sync).
 
 ## For developers
 
@@ -84,18 +96,19 @@ npm run preview     # serve the production build
 ```
 src/
   audio/      mic capture, analyzer worker, DSP, synth band, amp simulator
-  content/    the curriculum: 9 chapters, 56 lessons, written in a compact tab language
+  content/    the curriculum (9 chapters, 56 lessons) and the Free play songbook, in a compact tab language
   game/       charts, judging, sessions, band arrangement, XP and progression
-  music/      notes, tunings, chord shapes, the tab parser
+  music/      notes, tunings, chord shapes, the tab parser, the tab/chord-sheet importer
+  sync/       merge rules and the GitHub gist client
   render/     the canvas note highway
   state/      settings and progress (saved to localStorage)
   ui/         screens, components and art
-tests/        DSP, curriculum, full playthroughs and progression tests
+tests/        DSP, curriculum, full playthroughs, importer, sync and progression tests
 ```
 
 ### Writing lessons
 
-Lessons live in `src/content/chapters/`. Riffs use a small tab language:
+Lessons live in `src/content/chapters/`, Free play songs in `src/content/songbook/`. Riffs use a small tab language:
 
 ```
 q e s h w        note length (quarter, eighth, sixteenth, half, whole); q. dotted, e3 triplet

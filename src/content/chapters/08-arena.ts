@@ -125,6 +125,8 @@ export const arena: Chapter = {
       title: 'Steel Thunder',
       kind: 'song',
       style: 'Modern metal',
+      genre: 'metal',
+      level: 4,
       summary: 'Headline the arena: Drop D riffs, a crushing breakdown and a huge chorus.',
       skills: ['drop D', 'syncopation', 'palm muting'],
       bpm: 126,

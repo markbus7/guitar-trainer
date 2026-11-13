@@ -92,6 +92,10 @@ export interface TheoryStep {
 
 export type LessonKind = 'learn' | 'exercise' | 'riff' | 'song' | 'drill';
 
+export type Genre = 'pop-punk' | 'punk' | 'rock' | 'metal' | 'acoustic' | 'blues';
+
+export type Level = 1 | 2 | 3 | 4 | 5;
+
 export interface Lesson {
   id: string;
   title: string;
@@ -110,6 +114,12 @@ export interface Lesson {
   mode?: 'practice' | 'play';
   /** Genre / feel label for songs, e.g. "Pop-punk". */
   style?: string;
+  /** Free-play songs: genre used for filtering. */
+  genre?: Genre;
+  /** Free-play songs: difficulty from 1 (first weeks) to 5 (advanced). */
+  level?: Level;
+  /** Free-play songs: the (fictional) band that "plays" it. */
+  band?: string;
   /** Chord-change drill: alternate between two chords against the clock. */
   drill?: { chords: [string, string]; seconds: number };
 }

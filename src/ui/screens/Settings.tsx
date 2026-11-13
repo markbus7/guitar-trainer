@@ -11,6 +11,8 @@ import { enableMic, MicPanel } from '../components/MicPanel';
 import { Modal } from '../components/Modal';
 import { useMicEvents, useMicStatus } from '../hooks';
 import { toast } from '../toasts';
+import { connectGitHub, disconnectGitHub, syncNow, useSync } from '../../state/sync';
+import { TOKEN_URL } from '../../sync/gist';
 
 export function SettingsScreen() {
   const s = useSettings();
@@ -208,6 +210,8 @@ export function SettingsScreen() {
         </Row>
       </section>
 
+      <SyncCard />
+
       <section className="card settings-section">
         <h3>
           <Icon name="map" /> Progress
@@ -221,7 +225,7 @@ export function SettingsScreen() {
           </button>
         </Row>
         <p className="faint small">
-          Fretforge runs entirely in your browser. Your microphone audio is analysed on this device and never recorded or uploaded. Progress is saved in this browser.
+          Fretforge runs entirely in your browser. Your microphone audio is analysed on this device and never recorded or uploaded. Progress is saved in this browser, and in your own private gist if you turn on sync.
         </p>
       </section>
 
@@ -229,6 +233,7 @@ export function SettingsScreen() {
       {confirmReset && (
         <Modal title="Reset all progress?" onClose={() => setConfirmReset(false)}>
           <p className="muted">Your stars, XP, streak and achievements on this device will be gone. Settings stay.</p>
+          {useSync.getState().token && <p className="note">Sync is on, so your progress comes back from GitHub at the next sync. Disconnect sync first to really start over.</p>}
           <div className="modal-actions">
             <button className="btn btn-ghost" onClick={() => setConfirmReset(false)}>
               Keep it
@@ -247,6 +252,103 @@ export function SettingsScreen() {
         </Modal>
       )}
     </div>
+  );
+}
+
+function ago(t?: number) {
+  if (!t) return 'never';
+  const s = Math.round((Date.now() - t) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.round(s / 60)} min ago`;
+  if (s < 86400) return `${Math.round(s / 3600)} h ago`;
+  return new Date(t).toLocaleDateString();
+}
+
+function SyncCard() {
+  const sync = useSync();
+  const [token, setToken] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const connect = async () => {
+    setBusy(true);
+    try {
+      await connectGitHub(token);
+      setToken('');
+      toast({ title: 'Sync is on', body: 'Your progress and tabs are saved to a private gist.' });
+    } catch {
+      /* the error is shown in the card */
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="card settings-section sync-card">
+      <h3>
+        <Icon name="cloud" /> Sync across devices
+      </h3>
+      {sync.token ? (
+        <>
+          <div className="sync-status">
+            <span className={`sync-dot ${sync.status}`} />
+            <span>
+              <strong>Connected as {sync.login ?? 'GitHub user'}</strong>
+              <span className="faint">
+                {sync.status === 'syncing' ? 'Syncing…' : sync.status === 'error' ? sync.error : `Last synced ${ago(sync.lastSync)}`}
+              </span>
+            </span>
+          </div>
+          <div className="sync-actions">
+            <button className="btn btn-sm" disabled={sync.status === 'syncing'} onClick={() => void syncNow()}>
+              <Icon name="refresh" /> Sync now
+            </button>
+            <button className="btn btn-sm btn-ghost" onClick={disconnectGitHub}>
+              Disconnect
+            </button>
+          </div>
+          <p className="faint small">
+            Stars, XP, streak, achievements and your own tabs sync automatically. Settings stay per device. Disconnecting removes the token from this browser; the gist stays on your GitHub account.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="muted">
+            Play on your laptop and your phone with the same progress. Fretforge keeps a copy in a <strong>private gist</strong> on your own GitHub account.
+          </p>
+          <ol className="sync-steps">
+            <li>
+              <a href={TOKEN_URL} target="_blank" rel="noreferrer">
+                Create a GitHub token
+              </a>{' '}
+              with only the <strong>gist</strong> box ticked, and copy it.
+            </li>
+            <li>Paste it below and connect. Do the same on your other devices.</li>
+          </ol>
+          <div className="sync-form">
+            <input
+              type="password"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="ghp_…"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && token.trim() && void connect()}
+              aria-label="GitHub token"
+            />
+            <button className="btn btn-primary" disabled={!token.trim() || busy} onClick={() => void connect()}>
+              {busy ? 'Connecting…' : 'Connect'}
+            </button>
+          </div>
+          {sync.error && <p className="sync-error small">{sync.error}</p>}
+          <p className="faint small">The token is stored only in this browser and is only ever sent to GitHub.</p>
+        </>
+      )}
+    </section>
   );
 }
 

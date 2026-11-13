@@ -6,6 +6,8 @@ import { getLesson } from '../content/curriculum';
 import type { SessionMode } from '../game/session';
 import { useProgress } from '../state/progress';
 import { useSettings } from '../state/settings';
+import '../state/mytabs';
+import { startAutoSync } from '../state/sync';
 import { dayKey, rankFor, streakDays } from '../game/progression';
 import { Icon, type IconName } from './components/Icon';
 import { Logo } from './components/Logo';
@@ -13,6 +15,8 @@ import { useMicStatus } from './hooks';
 import { navigate, useRoute } from './router';
 import { ChapterScreen, NotFound } from './screens/Chapter';
 import { DrillScreen } from './screens/Drill';
+import { FreePlayScreen } from './screens/FreePlay';
+import { ImportTabScreen } from './screens/ImportTab';
 import { Home } from './screens/Home';
 import { LearnLesson } from './screens/Learn';
 import { LessonIntro } from './screens/LessonIntro';
@@ -25,6 +29,7 @@ import { Toasts } from './toasts';
 
 const NAV: { path: string; icon: IconName; label: string; match: string[] }[] = [
   { path: '/', icon: 'map', label: 'Tour', match: ['', 'chapter', 'lesson'] },
+  { path: '/songs', icon: 'disc', label: 'Free play', match: ['songs'] },
   { path: '/tuner', icon: 'tuner', label: 'Tuner', match: ['tuner'] },
   { path: '/chords', icon: 'chords', label: 'Chords', match: ['chords'] },
   { path: '/profile', icon: 'user', label: 'Profile', match: ['profile'] },
@@ -38,6 +43,8 @@ export function App() {
   const output = useSettings((s) => s.output);
   const volumes = useSettings((s) => s.volumes);
   const { status } = useMicStatus();
+
+  useEffect(() => startAutoSync(), []);
 
   // Browsers only start audio after a user gesture: unlock on the first tap or key.
   useEffect(() => {
@@ -91,6 +98,9 @@ export function App() {
         screen = <PlayScreen key={`${id}-${mode}-${tempo}`} lessonId={id ?? ''} mode={['play', 'practice', 'listen'].includes(mode) ? mode : 'play'} tempo={tempo} />;
         break;
       }
+      case 'songs':
+        screen = id === 'new' ? <ImportTabScreen /> : id === 'edit' ? <ImportTabScreen key={route.parts[2]} editId={route.parts[2] ?? ''} /> : <FreePlayScreen />;
+        break;
       case 'tuner':
         screen = <TunerScreen />;
         break;

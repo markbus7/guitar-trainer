@@ -1,4 +1,4 @@
-import { ALL_LESSONS, CHAPTERS } from '../../content/curriculum';
+import { ALL_LESSONS, CHAPTERS, SONGBOOK_CHAPTER } from '../../content/curriculum';
 import { ACHIEVEMENTS, RANKS, chapterStars, dayKey, rankFor, streakDays, totalSeconds, totalStars } from '../../game/progression';
 import { progressData, useProgress } from '../../state/progress';
 import { Icon } from '../components/Icon';
@@ -11,7 +11,7 @@ export function ProfileScreen() {
   const p = progressData();
   const { rank, next, progress } = rankFor(p.xp);
   const stars = totalStars(p);
-  const maxStarsAll = CHAPTERS.reduce((a, c) => a + chapterStars(p, c).max, 0);
+  const maxStarsAll = [...CHAPTERS, SONGBOOK_CHAPTER].reduce((a, c) => a + chapterStars(p, c).max, 0);
   const done = ALL_LESSONS.filter((l) => (p.lessons[l.id]?.stars ?? 0) > 0).length;
   const minutes = Math.round(totalSeconds(p) / 60);
   const streak = streakDays(p.days);

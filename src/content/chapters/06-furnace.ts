@@ -100,6 +100,8 @@ export const furnace: Chapter = {
       title: 'Iron Forge',
       kind: 'song',
       style: 'Heavy metal',
+      genre: 'metal',
+      level: 3,
       summary: 'Sparks fly: a galloping heavy metal anthem with a chromatic verse.',
       skills: ['gallop', 'chromatic', 'power chords'],
       bpm: 112,

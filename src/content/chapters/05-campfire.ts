@@ -136,6 +136,8 @@ export const campfire: Chapter = {
       title: 'Embers',
       kind: 'song',
       style: 'Rock ballad',
+      genre: 'acoustic',
+      level: 2,
       summary: 'A slow-burning campfire ballad: strummed verses and a big chorus.',
       skills: ['open chords', 'strumming'],
       bpm: 76,

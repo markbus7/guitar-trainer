@@ -1,4 +1,4 @@
-import { CHAPTERS, findLesson } from '../../content/curriculum';
+import { CHAPTERS, FREE_PLAY_SONGS, SONGBOOK_CHAPTER, findLesson } from '../../content/curriculum';
 import { CHORD_LIST } from '../../music/chords';
 import { chapterStars, dayKey, isChapterUnlocked, lessonStars, nextRecommended, streakDays, totalStars } from '../../game/progression';
 import { progressData, useProgress } from '../../state/progress';
@@ -21,7 +21,7 @@ export function Home() {
   const todaySec = days[dayKey()] ?? 0;
   const streak = streakDays(days);
   const stars = totalStars(p);
-  const maxAll = CHAPTERS.reduce((a, c) => a + chapterStars(p, c).max, 0);
+  const maxAll = [...CHAPTERS, SONGBOOK_CHAPTER].reduce((a, c) => a + chapterStars(p, c).max, 0);
   const started = lessonStars(p, next.id) > 0;
 
   return (
@@ -66,6 +66,13 @@ export function Home() {
       </section>
 
       <section className="quick rise" style={{ animationDelay: '0.05s' }}>
+        <button className="quick-card quick-free" onClick={() => navigate('/songs')}>
+          <Icon name="disc" />
+          <span>
+            <strong>Free play</strong>
+            <span className="faint">{FREE_PLAY_SONGS.length} songs, all open</span>
+          </span>
+        </button>
         <button className="quick-card" onClick={() => navigate('/tuner')}>
           <Icon name="tuner" />
           <span>
