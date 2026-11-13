@@ -1,7 +1,7 @@
 {
   "name": "fretforge",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "Fretforge - a rock, punk and metal guitar learning game that listens to you play.",
   "type": "module",
   "license": "MIT",
