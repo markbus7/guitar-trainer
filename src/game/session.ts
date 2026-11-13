@@ -456,6 +456,8 @@ export class GameSession {
         judged: this.hud.judged + 1,
         heardOk: true,
         lastGrade: j.grade,
+        // A matched chord reads better as its name than as its loudest note.
+        ...(note.kind === 'chord' && note.name ? { heard: note.name } : {}),
       });
     }
     this.judgementListeners.forEach((f) => f({ j, note }));

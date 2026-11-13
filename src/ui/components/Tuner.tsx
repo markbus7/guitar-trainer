@@ -116,8 +116,8 @@ export function Tuner({ tuning: tuningId = 'standard', onAllTuned, compact = fal
             return <line key={i} x1={150 + Math.sin(a) * r1} y1={150 - Math.cos(a) * r1} x2={150 + Math.sin(a) * r2} y2={150 - Math.cos(a) * r2} stroke="rgba(255,255,255,0.35)" strokeWidth={i === 10 ? 3 : 1.5} />;
           })}
           <g style={{ transform: `rotate(${angle}deg)`, transformOrigin: '150px 150px', transition: 'transform 0.12s linear' }}>
-            <line x1="150" y1="150" x2="150" y2="44" stroke={color} strokeWidth="4" strokeLinecap="round" />
-            <circle cx="150" cy="150" r="9" fill={color} />
+            <line x1="150" y1="72" x2="150" y2="44" stroke={color} strokeWidth="4" strokeLinecap="round" />
+            <circle cx="150" cy="30" r="8" fill={color} stroke="#17131c" strokeWidth="3" />
           </g>
           <text x="40" y="168" className="tg-side">♭ flat</text>
           <text x="260" y="168" textAnchor="end" className="tg-side">sharp ♯</text>

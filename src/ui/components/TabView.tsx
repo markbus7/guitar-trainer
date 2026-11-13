@@ -3,9 +3,13 @@ import { parseTab, type TabEvent } from '../../music/tab';
 import type { TuningId } from '../../music/notes';
 import { stringLabel, type StringNumber } from '../../music/notes';
 import { STRING_COLORS } from '../theme';
+import { useMediaQuery } from '../hooks';
 
 /** Classic six-line tab, drawn from the same tab language the lessons are written in. */
-export function TabView({ tab, tuning = 'standard', barsPerRow = 4, maxBars = 8 }: { tab: string; tuning?: TuningId; barsPerRow?: number; maxBars?: number }) {
+export function TabView({ tab, tuning = 'standard', barsPerRow: perRow = 4, maxBars = 8 }: { tab: string; tuning?: TuningId; barsPerRow?: number; maxBars?: number }) {
+  // Two bars per line on phones keeps the numbers big enough to read.
+  const narrow = useMediaQuery('(max-width: 640px)');
+  const barsPerRow = narrow ? Math.min(perRow, 2) : perRow;
   const parsed = useMemo(() => {
     try {
       return parseTab(tab, { tuning, strictBars: false });

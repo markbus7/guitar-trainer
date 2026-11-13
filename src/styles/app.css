@@ -825,7 +825,7 @@
   min-height: 260px;
   display: grid;
   align-items: end;
-  padding: 28px;
+  padding: 66px 28px 28px;
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
@@ -963,6 +963,33 @@
   .chapter-hero .hero-shade,
   .intro-hero .hero-shade {
     background: linear-gradient(180deg, rgba(12, 10, 15, 0.3) 0%, rgba(12, 10, 15, 0.94) 50%);
+  }
+}
+
+/* Phones held sideways: little height, so put the nav back in the top bar (icons only). */
+@media (max-width: 860px) and (max-height: 500px) and (orientation: landscape) {
+  .topbar {
+    height: 52px;
+  }
+  .topnav {
+    display: flex;
+    margin: 0 auto;
+  }
+  .topnav-link {
+    height: 38px;
+    padding: 0 12px;
+  }
+  .topnav-link span {
+    display: none;
+  }
+  .bottomnav {
+    display: none;
+  }
+  .page {
+    padding-bottom: 32px;
+  }
+  .hero-body {
+    padding-top: 28px;
   }
 }
 
@@ -1467,12 +1494,13 @@
 }
 
 @media (max-width: 700px) and (orientation: portrait) {
+  .play {
+    grid-template-rows: auto 1fr auto auto;
+  }
   .rotate-hint {
     display: block;
-    position: absolute;
-    bottom: 4px;
-    left: 0;
-    right: 0;
+    margin: 0;
+    padding: 0 12px max(8px, env(safe-area-inset-bottom));
     text-align: center;
     font-size: 11px;
     pointer-events: none;

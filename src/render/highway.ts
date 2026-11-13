@@ -51,6 +51,15 @@ interface Popup {
   start: number;
   text: string;
   color: string;
+  /** When a newer popup replaced this one: it fades out quickly from here. */
+  kill?: number;
+}
+
+interface PmRun {
+  first: number;
+  last: number;
+  top: StringNumber;
+  named: boolean;
 }
 
 const SPEED = {
@@ -81,6 +90,10 @@ export class Highway {
   private resizeObs: ResizeObserver | null = null;
   private labels: Record<StringNumber, string>;
   private sectionNames: { time: number; name: string }[];
+  /** Chord names show where the chord changes and at bar starts, not on every strum. */
+  private showName: boolean[];
+  /** Palm-mute runs, drawn once as "PM - - - -" like printed tab. */
+  private pmRuns: PmRun[] = [];
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -94,6 +107,27 @@ export class Highway {
     this.sectionNames = chart.sections
       .filter((s) => s.name)
       .map((s) => ({ time: s.startBeat * chart.secPerBeat, name: s.name!.toUpperCase() }));
+    const notes = chart.notes;
+    this.showName = notes.map((n, i) => {
+      if (n.kind !== 'chord' || !n.name) return false;
+      const prev = notes[i - 1];
+      if (!prev || prev.kind !== 'chord' || prev.name !== n.name) return true;
+      const bar = n.beat / chart.beatsPerBar;
+      return Math.abs(bar - Math.round(bar)) < 1e-6;
+    });
+    for (let i = 0; i < notes.length; i++) {
+      if (!notes[i].pm) continue;
+      let j = i;
+      while (j + 1 < notes.length && notes[j + 1].pm && notes[j + 1].time - notes[j].time < chart.secPerBeat * 2.01) j++;
+      let top: StringNumber = 6;
+      let named = false;
+      for (let k = i; k <= j; k++) {
+        for (const sp of notes[k].notes) if (sp.string < top) top = sp.string;
+        if (this.showName[k]) named = true;
+      }
+      this.pmRuns.push({ first: i, last: j, top, named });
+      i = j;
+    }
     this.resize();
     if (typeof ResizeObserver !== 'undefined') {
       this.resizeObs = new ResizeObserver(() => this.resize());
@@ -201,7 +235,7 @@ export class Highway {
     const strings = note.notes.length ? note.notes.map((n) => n.string) : STRINGS;
     const topString = Math.min(...strings);
     if (grade === 'miss') {
-      this.popups.push({ x: this.strikeX + 8, y: this.laneY(topString) - this.r - 4, start: now, text: 'MISS', color: GRADE_COLORS.miss });
+      this.pushPopup({ x: this.strikeX + 8, y: this.laneY(topString) - this.r - 4, start: now, text: label ?? 'MISS', color: GRADE_COLORS.miss });
       return;
     }
     const count = this.opts.reducedMotion ? 0 : grade === 'perfect' ? 14 : grade === 'great' ? 10 : 6;
@@ -226,8 +260,14 @@ export class Highway {
     }
     if (this.particles.length > 500) this.particles.splice(0, this.particles.length - 500);
     const text = label ?? (grade === 'perfect' ? 'PERFECT' : grade === 'great' ? 'GREAT' : 'GOOD');
-    this.popups.push({ x: this.strikeX + 8, y: this.laneY(topString) - this.r - 4, start: now, text, color: GRADE_COLORS[grade] });
-    if (this.popups.length > 8) this.popups.shift();
+    this.pushPopup({ x: this.strikeX + 8, y: this.laneY(topString) - this.r - 4, start: now, text, color: GRADE_COLORS[grade] });
+  }
+
+  /** One grade label at a time: a new one quickly fades out the one before, so fast riffs stay readable. */
+  private pushPopup(p: Popup) {
+    for (const old of this.popups) old.kill ??= p.start;
+    this.popups.push(p);
+    if (this.popups.length > 4) this.popups.shift();
   }
 
   draw(f: HighwayFrame) {
@@ -241,7 +281,14 @@ export class Highway {
     this.drawBackground(f);
     this.drawGrid(f.songTime);
     this.drawStrings(f);
+    // Notes that have passed slide under the string labels, not over them.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(this.strikeX - 28, 0, w, h);
+    ctx.clip();
     this.drawNotes(f);
+    this.drawPalmMutes(f);
+    ctx.restore();
     this.drawStrikeLine(f);
     this.drawEffects(f.now, dt);
     // Fade out what has passed.
@@ -510,9 +557,9 @@ export class Highway {
         scale = 1 + 0.5 * k;
         alpha = 1 - k;
       } else if (vis?.state === 'miss') {
-        alpha = 0.55;
+        alpha = 0.55 * Math.max(0.2, Math.min(1, 1 - (this.strikeX - r - x) / 60));
       } else if (x < this.strikeX - r) {
-        alpha = Math.max(0.15, 1 - (this.strikeX - x) / 120);
+        alpha = Math.max(0.15, 1 - (this.strikeX - r - x) / 50);
       }
       const approaching = !vis && x - this.strikeX < this.pps * 0.25 && x >= this.strikeX - 2;
 
@@ -550,15 +597,10 @@ export class Highway {
       ctx.globalAlpha = alpha;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
-      if (n.kind === 'chord' && n.name) {
+      if (this.showName[i] || (waiting && n.kind === 'chord' && n.name)) {
         ctx.font = `600 ${Math.round(Math.max(12, r * 0.95))}px ${FONT_DISPLAY}`;
         ctx.fillStyle = missed ? '#8b8291' : '#ffe2a8';
-        ctx.fillText(n.name, x, topY - (n.notes.length > 1 ? r * 0.2 : 0));
-      }
-      if (n.pm) {
-        ctx.font = `700 ${Math.round(r * 0.62)}px ${FONT_BODY}`;
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.fillText('PM', x, n.kind === 'chord' && n.name ? topY - r * 1.15 : topY);
+        ctx.fillText(n.name!, x, topY - (n.notes.length > 1 ? r * 0.2 : 0));
       }
       if (n.bend && n.kind === 'note') {
         ctx.font = `700 ${Math.round(r * 0.75)}px ${FONT_BODY}`;
@@ -578,6 +620,43 @@ export class Highway {
         ctx.fillText(n.strum === 'up' ? '↑' : '↓', x, Math.min(yb, this.h - this.bottom - r * 0.6));
       }
       ctx.globalAlpha = 1;
+    }
+  }
+
+  private drawPalmMutes(f: HighwayFrame) {
+    if (!this.pmRuns.length) return;
+    const ctx = this.ctx;
+    const notes = this.chart.notes;
+    const r = this.r;
+    const [i0, i1] = this.visibleRange(f.songTime);
+    const fs = Math.round(Math.max(10, r * 0.62));
+    ctx.font = `700 ${fs}px ${FONT_BODY}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    for (const run of this.pmRuns) {
+      if (run.last < i0 || run.first >= i1) continue;
+      const xa = this.x(notes[run.first].time, f.songTime);
+      const xb = this.x(notes[run.last].time, f.songTime);
+      if (xb < this.strikeX - r) continue;
+      const y = this.laneY(run.top) - r - 5 - (run.named ? r * 1.15 : 0);
+      const ly = y - fs * 0.42;
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+      if (xa >= this.strikeX - r * 0.5) ctx.fillText('PM', xa, y);
+      const from = Math.max(xa + fs * 1.1, this.strikeX);
+      if (xb > from + 4) {
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(from, ly);
+        ctx.lineTo(xb, ly);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(xb, ly - 3.5);
+        ctx.lineTo(xb, ly + 3.5);
+        ctx.stroke();
+      }
     }
   }
 
@@ -645,9 +724,10 @@ export class Highway {
     ctx.textBaseline = 'bottom';
     this.popups = this.popups.filter((p) => {
       const k = (now - p.start) / 700;
-      if (k >= 1) return false;
+      const kill = p.kill === undefined ? 1 : 1 - (now - p.kill) / 110;
+      if (k >= 1 || kill <= 0) return false;
       const y = p.y - 26 * k;
-      ctx.globalAlpha = k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85;
+      ctx.globalAlpha = (k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85) * Math.min(1, kill);
       ctx.font = `700 ${Math.round(Math.max(13, this.r * 0.95))}px ${FONT_DISPLAY}`;
       ctx.lineWidth = 4;
       ctx.strokeStyle = 'rgba(10,8,12,0.8)';

@@ -51,8 +51,25 @@ export function Results({
     if (stats.chordMisses >= 3) advice.push('Chord changes are the tricky bit. Practice mode waits at every chord so you can build the shapes.');
     if (stats.bendShort >= 2) advice.push('Some bends fell short. Push with two or three fingers until it matches the target pitch.');
     if (stats.wrongNotes > stats.total * 0.3 && stats.miss > 4) advice.push('Lots of extra notes: mute strings you are not playing with the side of your hands.');
+    if (acc < 40 && stats.total >= 8) advice.unshift('This one is still fast for you, and that is normal. Tap Slower, or learn the parts in Practice mode first.');
   }
-  const trouble = result.sections.filter((s) => s.accuracy < 0.8 && s.total >= 4).sort((a, b) => a.accuracy - b.accuracy).slice(0, 2);
+  // Songs repeat sections (two verses, three choruses), so judge each part as a whole.
+  const parts = new Map<string, { hit: number; total: number }>();
+  for (const sec of result.sections) {
+    const p = parts.get(sec.name) ?? { hit: 0, total: 0 };
+    p.hit += sec.accuracy * sec.total;
+    p.total += sec.total;
+    parts.set(sec.name, p);
+  }
+  const trouble =
+    listen || practice || acc < 40 || parts.size < 2
+      ? []
+      : [...parts]
+          .map(([name, p]) => ({ name, accuracy: p.total ? p.hit / p.total : 1, total: p.total }))
+          .filter((p) => p.accuracy < 0.8 && p.total >= 4)
+          .sort((a, b) => a.accuracy - b.accuracy)
+          .slice(0, 2);
+  const adviceShown = advice.slice(0, Math.max(1, 3 - trouble.length));
 
   return (
     <div className="results-backdrop">
@@ -99,18 +116,24 @@ export function Results({
                 ))}
               </div>
             )}
-            {(advice.length > 0 || trouble.length > 0) && (
+            {(adviceShown.length > 0 || trouble.length > 0) && (
               <div className="advice">
                 <h3>
                   <Icon name="sparkle" /> Coach’s notes
                 </h3>
                 <ul>
-                  {trouble.map((t) => (
-                    <li key={t.name}>
-                      The <strong>{t.name}</strong> was the toughest part ({Math.round(t.accuracy * 100)}%). Try it again in Practice mode.
-                    </li>
-                  ))}
-                  {advice.map((a) => (
+                  {trouble.map((t, i) =>
+                    i === 0 ? (
+                      <li key={t.name}>
+                        The <strong>{t.name}</strong> was the toughest part ({Math.round(t.accuracy * 100)}%). Loop it in Practice mode.
+                      </li>
+                    ) : (
+                      <li key={t.name}>
+                        The <strong>{t.name}</strong> needs work too ({Math.round(t.accuracy * 100)}%).
+                      </li>
+                    ),
+                  )}
+                  {adviceShown.map((a) => (
                     <li key={a}>{a}</li>
                   ))}
                 </ul>

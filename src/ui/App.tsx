@@ -147,9 +147,9 @@ function TopBar({ active }: { active: string }) {
       </button>
       <nav className="topnav" aria-label="Main">
         {NAV.map((n) => (
-          <button key={n.path} className={`topnav-link ${n.match.includes(active) ? 'on' : ''}`} onClick={() => navigate(n.path)}>
+          <button key={n.path} className={`topnav-link ${n.match.includes(active) ? 'on' : ''}`} onClick={() => navigate(n.path)} aria-label={n.label}>
             <Icon name={n.icon} />
-            {n.label}
+            <span>{n.label}</span>
           </button>
         ))}
       </nav>

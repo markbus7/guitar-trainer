@@ -45,7 +45,7 @@ export function Home() {
               <Icon name="play" /> {started ? 'Play again' : p.xp > 0 ? 'Continue' : 'Start your journey'}
             </button>
             <button className="btn btn-ghost" onClick={() => navigate(`/chapter/${chapter.id}`)}>
-              {chapter.venue}
+              <Icon name="map" /> {chapter.venue} setlist
             </button>
           </div>
         </div>

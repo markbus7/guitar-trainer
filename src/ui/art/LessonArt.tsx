@@ -187,12 +187,12 @@ const ART: Record<ArtId, ReactNode> = {
           </text>
         </g>
       ))}
-      <text x="110" y="188" textAnchor="middle" className="la-label">0 = open string</text>
-      <text x="168" y="168" textAnchor="start" className="la-label">3 = press the 3rd fret</text>
-      <text x="336" y="26" textAnchor="end" className="la-label">thin string on top</text>
-      <text x="336" y="196" textAnchor="end" className="la-label faint">thick string at the bottom</text>
-      <path d="M100 18h220" stroke="#ffd166" strokeWidth="2" markerEnd="url(#la-arrow)" />
-      <text x="96" y="22" textAnchor="end" className="la-label">time</text>
+      <text x="110" y="180" textAnchor="middle" className="la-label">0 = open string</text>
+      <text x="174" y="180" textAnchor="start" className="la-label">3 = press the 3rd fret</text>
+      <text x="336" y="20" textAnchor="end" className="la-label">thin string on top</text>
+      <text x="336" y="197" textAnchor="end" className="la-label faint">thick string at the bottom</text>
+      <path d="M92 16h92" stroke="#ffd166" strokeWidth="2" markerEnd="url(#la-arrow)" />
+      <text x="60" y="20" textAnchor="start" className="la-label">time</text>
     </g>
   ),
   'palm-mute': (

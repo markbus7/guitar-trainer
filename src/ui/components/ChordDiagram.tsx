@@ -30,8 +30,10 @@ export function ChordDiagram({
   const rows = 5;
   const W = 120;
   const H = 150;
-  const left = 18;
-  const right = W - 14;
+  // Leave room beside the nut for the fret number when the shape sits up the neck.
+  const basePad = base > 1 ? 9 : 0;
+  const left = 18 + (leftHanded ? 0 : basePad);
+  const right = W - 14 - (leftHanded ? basePad : 0);
   const top = showName ? 44 : 22;
   const bottom = H - 8;
   const sx = (right - left) / 5;
@@ -55,7 +57,7 @@ export function ChordDiagram({
         <line key={i} x1={col(i)} x2={col(i)} y1={top} y2={bottom} stroke="rgba(255,255,255,0.45)" strokeWidth={1 + (5 - i) * 0.3} />
       ))}
       {base > 1 && (
-        <text x={leftHanded ? right + 2 : left - 5} y={top + fy * 0.62} textAnchor={leftHanded ? 'start' : 'end'} className="cd-base">
+        <text x={leftHanded ? right + 11 : left - 11} y={top + fy * 0.62} textAnchor={leftHanded ? 'start' : 'end'} className="cd-base">
           {base}
         </text>
       )}
