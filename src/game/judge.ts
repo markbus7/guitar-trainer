@@ -396,6 +396,16 @@ export class PracticeJudge {
     return { wrong: res.bestOtherLabel || 'something else' };
   }
 
+  /** Give up on the current target (detection trouble, or just stuck). */
+  skip(): ChartNote | undefined {
+    const n = this.current;
+    if (!n) return undefined;
+    this.index++;
+    this.attempts = 0;
+    this.pendingStrum = null;
+    return n;
+  }
+
   get accuracy() {
     return this.notes.length ? this.firstTry / this.notes.length : 0;
   }
