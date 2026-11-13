@@ -127,6 +127,8 @@ export const divebar: Chapter = {
       title: 'Neon Nights',
       kind: 'song',
       style: 'Classic rock',
+      genre: 'rock',
+      level: 2,
       summary: 'A bar-room rocker built from stabs, eighth notes and a big chorus.',
       skills: ['power chords'],
       bpm: 104,

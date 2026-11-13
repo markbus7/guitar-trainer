@@ -315,7 +315,9 @@ button {
 }
 
 select,
-input[type='text'] {
+input[type='text'],
+input[type='password'],
+input[type='search'] {
   appearance: none;
   height: 44px;
   padding: 0 14px;
@@ -441,6 +443,22 @@ input[type='range']::-moz-range-thumb {
 .switch[aria-checked='true']::after {
   transform: translateX(20px);
   background: #fff;
+}
+
+textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-3);
 }
 
 /* ---------- Motion ---------- */

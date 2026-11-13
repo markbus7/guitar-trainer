@@ -1,4 +1,4 @@
-import { CHAPTERS, getLesson, maxStars } from '../content/curriculum';
+import { CHAPTERS, CUSTOM_PREFIX, findLesson, maxStars } from '../content/curriculum';
 import type { Chapter, Lesson } from '../content/types';
 
 /**
@@ -109,8 +109,11 @@ export function streakDays(days: Record<string, number>, now = Date.now(), minSe
   return n;
 }
 
+/** Stars from the tour and the songbook (tabs you added yourself don't count). */
 export function totalStars(p: ProgressData) {
-  return Object.values(p.lessons).reduce((a, r) => a + r.stars, 0);
+  let n = 0;
+  for (const [id, r] of Object.entries(p.lessons)) if (!id.startsWith(CUSTOM_PREFIX)) n += r.stars;
+  return n;
 }
 
 export function totalSeconds(p: ProgressData) {
@@ -143,7 +146,8 @@ export function isChapterUnlocked(p: ProgressData, chapterIndex: number, unlockA
 export function isLessonUnlocked(p: ProgressData, lessonId: string, unlockAll = false): boolean {
   if (unlockAll) return true;
   const ci = CHAPTERS.findIndex((c) => c.lessons.some((l) => l.id === lessonId));
-  if (ci < 0) return false;
+  // Free play (songbook and your own tabs) is always open.
+  if (ci < 0) return true;
   if (!isChapterUnlocked(p, ci)) return false;
   const lessons = CHAPTERS[ci].lessons;
   const li = lessons.findIndex((l) => l.id === lessonId);
@@ -197,6 +201,18 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'streak-7', title: 'Week Warrior', description: 'Practise seven days in a row.', check: (p) => streakDays(p.days) >= 7 },
   { id: 'calluses', title: 'Calluses', description: 'Practise for an hour in total.', check: (p) => totalSeconds(p) >= 3600 },
   { id: 'stars-50', title: 'Star Collector', description: 'Collect 50 stars.', check: (p) => totalStars(p) >= 50 },
+  {
+    id: 'crate-digger',
+    title: 'Crate Digger',
+    description: 'Play 5 different songs from the Free play songbook.',
+    check: (p) => Object.entries(p.lessons).filter(([id, r]) => id.startsWith('sb-') && r.stars > 0).length >= 5,
+  },
+  {
+    id: 'own-material',
+    title: 'Own Material',
+    description: 'Play a tab you added yourself.',
+    check: (p) => Object.entries(p.lessons).some(([id, r]) => id.startsWith(CUSTOM_PREFIX) && r.stars > 0),
+  },
   { id: 'notes-1000', title: 'Thousand Notes', description: 'Play 1,000 correct notes.', check: (p) => p.notesHit >= 1000 },
 ];
 
@@ -211,10 +227,11 @@ export interface RunOutcome {
 }
 
 export function applyRun(p: ProgressData, run: RunResult, now = Date.now()): RunOutcome {
-  const lesson = getLesson(run.lessonId);
+  // A tab you added yourself may since have been deleted: score it like a song.
+  const lesson: Pick<Lesson, 'kind'> & Partial<Lesson> = findLesson(run.lessonId)?.lesson ?? { kind: 'song' };
   const prev = p.lessons[run.lessonId];
   const prevStars = prev?.stars ?? 0;
-  const stars = Math.max(0, Math.min(maxStars(lesson), run.stars));
+  const stars = Math.max(0, Math.min(maxStars(lesson as Lesson), run.stars));
   const gained = Math.max(0, stars - prevStars);
   const participation = run.mode === 'learn' ? (prevStars > 0 ? 5 : 0) : Math.round(4 + run.accuracy * 8);
   const xpGained = gained * STAR_XP[lesson.kind] + participation;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_LESSONS, isPlayable } from '../src/content/curriculum';
+import { SCORED_LESSONS, isPlayable } from '../src/content/curriculum';
 import { Analyzer } from '../src/audio/dsp/analyzer';
 import { buildChart } from '../src/game/chart';
 import { Judge, PracticeJudge, TIMING } from '../src/game/judge';
@@ -22,7 +22,7 @@ function lowestFreq(tuning: keyof typeof TUNINGS) {
 }
 
 function play(lessonId: string, opts: { sampleRate: number; wrong?: boolean; jitter?: number; tempo?: number; mode?: 'play' | 'practice' }) {
-  const lesson = ALL_LESSONS.find((l) => l.id === lessonId)!;
+  const lesson = SCORED_LESSONS.find((l) => l.id === lessonId)!;
   const chart = buildChart(lesson, opts.tempo ?? 1);
   const notes = performChart(chart, { leadIn: LEAD_IN, jitter: opts.jitter ?? 0.012, wrong: opts.wrong, seed: lessonId.length });
   const audio = renderPerformance(notes, { sampleRate: opts.sampleRate, duration: LEAD_IN + chart.duration + 1.5, noiseDb: -62 });
@@ -43,7 +43,7 @@ function play(lessonId: string, opts: { sampleRate: number; wrong?: boolean; jit
  * pause in between. Every target must be recognisable on its own.
  */
 function practice(lessonId: string, sampleRate: number, count = 24) {
-  const lesson = ALL_LESSONS.find((l) => l.id === lessonId)!;
+  const lesson = SCORED_LESSONS.find((l) => l.id === lessonId)!;
   const chart = buildChart(lesson, 1);
   const targets = chart.notes.slice(0, count);
   const gap = 0.7;
@@ -59,7 +59,7 @@ function practice(lessonId: string, sampleRate: number, count = 24) {
   return { judge, targets };
 }
 
-const playable = ALL_LESSONS.filter(isPlayable);
+const playable = SCORED_LESSONS.filter(isPlayable);
 
 describe('virtual guitarist plays every lesson', () => {
   playable.forEach((lesson, i) => {

@@ -144,6 +144,8 @@ export const skatepark: Chapter = {
       title: 'Curfew',
       kind: 'song',
       style: 'Pop-punk',
+      genre: 'pop-punk',
+      level: 3,
       summary: 'Sneak out, turn it up: chugging verses, stop-start pre-chorus and a sing-along chorus.',
       skills: ['palm muting', 'down-strokes', 'power chords'],
       bpm: 168,

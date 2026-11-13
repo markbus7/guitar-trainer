@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { unlockAudio } from '../../audio/engine';
-import { findLesson, maxStars } from '../../content/curriculum';
+import { MY_TABS_CHAPTER, SONGBOOK_CHAPTER, findLesson, isFreePlay, maxStars } from '../../content/curriculum';
+import { GENRES } from '../../content/genres';
 import type { Lesson } from '../../content/types';
 import { buildChart } from '../../game/chart';
 import type { SessionMode } from '../../game/session';
@@ -30,6 +31,10 @@ const TEMPOS = [0.5, 0.7, 0.85, 1];
 export function LessonIntro({ lesson }: { lesson: Lesson }) {
   const info = findLesson(lesson.id)!;
   const chapter = info.chapter;
+  const free = isFreePlay(lesson.id);
+  const mine = chapter === MY_TABS_CHAPTER;
+  const back = mine ? '/songs?tab=mine' : chapter === SONGBOOK_CHAPTER ? '/songs' : `/chapter/${chapter.id}`;
+  const accent = lesson.genre && free ? GENRES[lesson.genre].color : chapter.accent;
   const rec = useProgress((s) => s.lessons[lesson.id]);
   const output = useSettings((s) => s.output);
   const leftHanded = useSettings((s) => s.leftHanded);
@@ -63,16 +68,16 @@ export function LessonIntro({ lesson }: { lesson: Lesson }) {
   const tuning = lesson.tuning ?? 'standard';
 
   return (
-    <div className="page lesson-intro" style={{ '--accent': chapter.accent } as React.CSSProperties}>
+    <div className="page lesson-intro" style={{ '--accent': accent } as React.CSSProperties}>
       <header className="intro-hero card">
-        <VenueArt art={chapter.art} accent={chapter.accent} className="intro-art" />
+        <VenueArt art={chapter.art} accent={accent} className="intro-art" />
         <div className="hero-shade" />
-        <button className="btn btn-icon btn-ghost chapter-back" onClick={() => goBack(`/chapter/${chapter.id}`)} aria-label="Back">
+        <button className="btn btn-icon btn-ghost chapter-back" onClick={() => goBack(back)} aria-label="Back">
           <Icon name="back" />
         </button>
         <div className="intro-head">
           <span className="eyebrow">
-            {chapter.venue} · {KIND_LABEL[lesson.kind]}
+            {free ? (mine ? 'My tab' : 'Free play') : chapter.venue} · {free ? (lesson.band ?? 'Song') : KIND_LABEL[lesson.kind]}
           </span>
           <h1>{lesson.title}</h1>
           <p className="muted">{lesson.summary}</p>
@@ -127,6 +132,20 @@ export function LessonIntro({ lesson }: { lesson: Lesson }) {
                 {chords.map((c) => (
                   <ChordDiagram key={c.name + c.frets.join()} frets={c.frets} fingers={c.fingers} name={c.name} chord={c.id ? CHORDS[c.id] : undefined} size={112} leftHanded={leftHanded} />
                 ))}
+              </div>
+            </article>
+          )}
+
+          {mine && (
+            <article className="tip card">
+              <h3>Your own tab</h3>
+              <p className="muted">
+                Tab doesn't say how long each note lasts, so the rhythm here is a best guess. Start in Practice mode, where the highway waits for you, and change the tempo or fix the tab if something feels off.
+              </p>
+              <div>
+                <button className="btn btn-sm" onClick={() => navigate(`/songs/edit/${lesson.id}`)}>
+                  <Icon name="edit" /> Edit tab
+                </button>
               </div>
             </article>
           )}

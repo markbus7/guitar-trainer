@@ -172,6 +172,8 @@ export const theater: Chapter = {
       title: 'Spotlight',
       kind: 'song',
       style: 'Rock solo',
+      genre: 'rock',
+      level: 4,
       summary: 'Your first guitar solo, over a full band. Make it scream.',
       skills: ['licks', 'bends', 'slides'],
       bpm: 88,

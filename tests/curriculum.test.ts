@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_LESSONS, CHAPTERS, isPlayable } from '../src/content/curriculum';
+import { ALL_LESSONS, CHAPTERS, FREE_PLAY_SONGS, SCORED_LESSONS, SONGBOOK_CHAPTER, isPlayable, isTourLesson } from '../src/content/curriculum';
+import { SONGBOOK } from '../src/content/songbook';
 import { buildChart } from '../src/game/chart';
 import { CHORDS } from '../src/music/chords';
 import { parseTab } from '../src/music/tab';
@@ -14,8 +15,38 @@ function figureChords(f?: Figure): string[] {
 
 describe('curriculum', () => {
   it('has unique lesson ids', () => {
-    const ids = ALL_LESSONS.map((l) => l.id);
+    const ids = SCORED_LESSONS.map((l) => l.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('keeps the songbook apart from the tour', () => {
+    expect(SONGBOOK.length).toBeGreaterThanOrEqual(15);
+    expect(SONGBOOK_CHAPTER.lessons).toBe(SONGBOOK);
+    for (const l of SONGBOOK) {
+      expect(l.id.startsWith('sb-'), l.id).toBe(true);
+      expect(l.kind, l.id).toBe('song');
+      expect(l.band, l.id).toBeTruthy();
+      expect(isTourLesson(l.id), l.id).toBe(false);
+    }
+    expect(ALL_LESSONS.every((l) => isTourLesson(l.id))).toBe(true);
+  });
+
+  it('sorts the songbook from easy to hard', () => {
+    const levels = SONGBOOK.map((l) => l.level ?? 0);
+    expect(levels).toEqual([...levels].sort((a, b) => a - b));
+    for (const level of [1, 2, 3, 4, 5]) expect(levels.filter((x) => x === level).length, `level ${level}`).toBeGreaterThanOrEqual(2);
+  });
+
+  it('gives every Free play song a genre and a level for the filters', () => {
+    expect(FREE_PLAY_SONGS.length).toBe(SONGBOOK.length + CHAPTERS.length + 3);
+    for (const l of FREE_PLAY_SONGS) {
+      expect(l.genre, l.id).toBeTruthy();
+      expect(l.level, l.id).toBeGreaterThanOrEqual(1);
+      expect(l.level, l.id).toBeLessThanOrEqual(5);
+    }
+    for (const genre of ['pop-punk', 'punk', 'rock', 'metal', 'acoustic']) {
+      expect(FREE_PLAY_SONGS.filter((l) => l.genre === genre).length, genre).toBeGreaterThanOrEqual(3);
+    }
   });
 
   it('ends every chapter with a gig song', () => {
@@ -25,7 +56,7 @@ describe('curriculum', () => {
     }
   });
 
-  for (const lesson of ALL_LESSONS) {
+  for (const lesson of SCORED_LESSONS) {
     it(`lesson ${lesson.id} is well formed`, () => {
       expect(lesson.title.length).toBeGreaterThan(2);
       expect(lesson.summary.length).toBeGreaterThan(10);
@@ -60,7 +91,7 @@ describe('curriculum', () => {
           }
         }
         // Keep songs a sensible length for a beginner session.
-        expect(chart.duration).toBeLessThan(150);
+        expect(chart.duration, `${lesson.id} lasts ${chart.duration.toFixed(0)} s`).toBeLessThan(150);
       }
     });
   }

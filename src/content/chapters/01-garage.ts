@@ -164,6 +164,8 @@ export const garage: Chapter = {
       title: 'First Noise',
       kind: 'song',
       style: 'Garage rock',
+      genre: 'rock',
+      level: 1,
       summary: 'Your first gig: an open-string garage stomper with a full band behind you.',
       skills: ['open strings', 'eighth notes'],
       bpm: 92,
