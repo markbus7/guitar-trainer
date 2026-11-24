@@ -1,6 +1,5 @@
 import { CHAPTERS, FREE_PLAY_SONGS, SONGBOOK_CHAPTER, findLesson } from '../../content/curriculum';
-import { CHORD_LIST } from '../../music/chords';
-import { chapterStars, dayKey, isChapterUnlocked, lessonStars, nextRecommended, streakDays, totalStars } from '../../game/progression';
+import { chapterStars, chapterUnlockLesson, dayKey, isChapterUnlocked, lessonStars, nextRecommended, streakDays, totalStars } from '../../game/progression';
 import { progressData, useProgress } from '../../state/progress';
 import { useSettings } from '../../state/settings';
 import { VenueArt } from '../art/VenueArt';
@@ -8,6 +7,7 @@ import { Icon } from '../components/Icon';
 import { Bar, ProgressRing, Stars } from '../components/Stars';
 import { navigate } from '../router';
 import { KIND_LABEL } from './labels';
+import { WorkoutCard } from './Training';
 
 export function Home() {
   useProgress((s) => s.lessons);
@@ -65,6 +65,10 @@ export function Home() {
         </div>
       </section>
 
+      <div className="rise" style={{ animationDelay: '0.03s' }}>
+        <WorkoutCard compact />
+      </div>
+
       <section className="quick rise" style={{ animationDelay: '0.05s' }}>
         <button className="quick-card quick-free" onClick={() => navigate('/songs')}>
           <Icon name="disc" />
@@ -80,11 +84,11 @@ export function Home() {
             <span className="faint">Start every session in tune</span>
           </span>
         </button>
-        <button className="quick-card" onClick={() => navigate('/chords')}>
-          <Icon name="chords" />
+        <button className="quick-card" onClick={() => navigate('/training')}>
+          <Icon name="bolt" />
           <span>
-            <strong>Chord library</strong>
-            <span className="faint">{CHORD_LIST.length} shapes, test yourself</span>
+            <strong>Training</strong>
+            <span className="faint">Metronome, note and ear games</span>
           </span>
         </button>
         <button className="quick-card" onClick={() => navigate('/profile')}>
@@ -101,7 +105,7 @@ export function Home() {
       <section className="tour">
         <div className="section-head">
           <h2>The Tour</h2>
-          <span className="faint">Nine stops from the garage to the main stage</span>
+          <span className="faint">{CHAPTERS.length} stops from the garage to the main stage</span>
         </div>
         <ol className="tour-list">
           {CHAPTERS.map((c, i) => {
@@ -126,7 +130,7 @@ export function Home() {
                     </span>
                     {!unlocked && (
                       <span className="tour-lock">
-                        <Icon name="lock" width={14} height={14} /> Play “{CHAPTERS[i - 1].lessons[CHAPTERS[i - 1].lessons.length - 1].title}” to unlock
+                        <Icon name="lock" width={14} height={14} /> Play “{chapterUnlockLesson(i).title}” to unlock
                       </span>
                     )}
                     {unlocked && current && <span className="tour-here">You are here</span>}

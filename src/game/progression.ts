@@ -134,11 +134,20 @@ export function chapterStars(p: ProgressData, ch: Chapter) {
   return { got, max };
 }
 
+/** The lesson that opens a tour stop: its unlockAfter lesson, or the previous stop's gig. */
+export function chapterUnlockLesson(chapterIndex: number): Lesson {
+  const ch = CHAPTERS[chapterIndex];
+  if (ch.unlockAfter) {
+    const l = CHAPTERS.flatMap((c) => c.lessons).find((x) => x.id === ch.unlockAfter);
+    if (l) return l;
+  }
+  const prev = CHAPTERS[chapterIndex - 1];
+  return prev.lessons[prev.lessons.length - 1];
+}
+
 export function isChapterUnlocked(p: ProgressData, chapterIndex: number, unlockAll = false): boolean {
   if (unlockAll || chapterIndex <= 0) return true;
-  const prev = CHAPTERS[chapterIndex - 1];
-  const gig = prev.lessons[prev.lessons.length - 1];
-  if (lessonStars(p, gig.id) > 0) return true;
+  if (lessonStars(p, chapterUnlockLesson(chapterIndex).id) > 0) return true;
   // Already started here (e.g. skipped ahead earlier): keep it open.
   return CHAPTERS[chapterIndex].lessons.some((l) => lessonStars(p, l.id) > 0);
 }
@@ -169,7 +178,7 @@ export interface Achievement {
   id: string;
   title: string;
   description: string;
-  check: (p: ProgressData, run?: RunResult) => boolean;
+  check: (p: ProgressData, run?: RunResult, now?: number) => boolean;
 }
 
 const passed = (id: string) => (p: ProgressData) => lessonStars(p, id) > 0;
@@ -183,6 +192,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'metal', title: 'Forged in Fire', description: 'Chug your way through the Furnace.', check: passed('furnace-gig') },
   { id: 'lead', title: 'Spotlight', description: 'Play your first solo in the Theater.', check: passed('theater-gig') },
   { id: 'arena', title: 'Thunder', description: 'Conquer the Arena in drop D.', check: passed('arena-gig') },
+  { id: 'studio', title: 'Platinum Record', description: 'Record Night Shift in the Studio with barre chords.', check: passed('studio-gig') },
   {
     id: 'headliner',
     title: 'Headliner',
@@ -197,8 +207,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   { id: 'on-fire', title: 'On Fire', description: 'Hit 50 notes in a row.', check: (p) => p.bestStreak >= 50 },
   { id: 'unstoppable', title: 'Unstoppable', description: 'Hit 150 notes in a row.', check: (p) => p.bestStreak >= 150 },
-  { id: 'streak-3', title: 'Habit', description: 'Practise three days in a row.', check: (p) => streakDays(p.days) >= 3 },
-  { id: 'streak-7', title: 'Week Warrior', description: 'Practise seven days in a row.', check: (p) => streakDays(p.days) >= 7 },
+  { id: 'streak-3', title: 'Habit', description: 'Practise three days in a row.', check: (p, _run, now) => streakDays(p.days, now) >= 3 },
+  { id: 'streak-7', title: 'Week Warrior', description: 'Practise seven days in a row.', check: (p, _run, now) => streakDays(p.days, now) >= 7 },
   { id: 'calluses', title: 'Calluses', description: 'Practise for an hour in total.', check: (p) => totalSeconds(p) >= 3600 },
   { id: 'stars-50', title: 'Star Collector', description: 'Collect 50 stars.', check: (p) => totalStars(p) >= 50 },
   {
@@ -260,7 +270,7 @@ export function applyRun(p: ProgressData, run: RunResult, now = Date.now()): Run
   const unlocked: Achievement[] = [];
   for (const a of ACHIEVEMENTS) {
     if (next.achievements[a.id]) continue;
-    if (a.check(next, run)) {
+    if (a.check(next, run, now)) {
       next.achievements[a.id] = now;
       unlocked.push(a);
     }
@@ -277,7 +287,7 @@ export function addPracticeTime(p: ProgressData, seconds: number, now = Date.now
   const unlocked: Achievement[] = [];
   for (const a of ACHIEVEMENTS) {
     if (next.achievements[a.id]) continue;
-    if ((a.id.startsWith('streak') || a.id === 'calluses') && a.check(next)) {
+    if ((a.id.startsWith('streak') || a.id === 'calluses') && a.check(next, undefined, now)) {
       next.achievements[a.id] = now;
       unlocked.push(a);
     }

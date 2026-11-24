@@ -133,6 +133,7 @@ export type VenueArt =
   | 'furnace'
   | 'theater'
   | 'arena'
+  | 'studio'
   | 'mainstage';
 
 export interface Chapter {
@@ -142,5 +143,7 @@ export interface Chapter {
   blurb: string;
   accent: string;
   art: VenueArt;
+  /** Lesson that opens this stop. Defaults to the previous stop's gig. */
+  unlockAfter?: string;
   lessons: Lesson[];
 }

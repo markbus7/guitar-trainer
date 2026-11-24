@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { unlockAudio } from '../../audio/engine';
-import { MY_TABS_CHAPTER, SONGBOOK_CHAPTER, findLesson, isFreePlay, maxStars } from '../../content/curriculum';
+import { MY_TABS_CHAPTER, SONGBOOK_CHAPTER, findLesson, isFreePlay, lessonParts, maxStars } from '../../content/curriculum';
 import { GENRES } from '../../content/genres';
 import type { Lesson } from '../../content/types';
 import { buildChart } from '../../game/chart';
@@ -62,6 +62,14 @@ export function LessonIntro({ lesson }: { lesson: Lesson }) {
     void unlockAudio();
     if (mode !== 'listen') void enableMic();
     navigate(`/play/${lesson.id}?mode=${mode}&tempo=${tempo}`);
+  };
+
+  const parts = useMemo(() => lessonParts(lesson), [lesson]);
+  const loopPart = (index: number) => {
+    void unlockAudio();
+    void enableMic();
+    const startTempo = mode === 'play' && tempo < 1 ? tempo : 0.7;
+    navigate(`/play/${lesson.id}?mode=${mode === 'practice' ? 'practice' : 'play'}&tempo=${mode === 'practice' ? 1 : startTempo}&loop=${index}`);
   };
 
   const firstTab = lesson.sections?.[0]?.tab;
@@ -131,6 +139,27 @@ export function LessonIntro({ lesson }: { lesson: Lesson }) {
               <div className="figure-chords">
                 {chords.map((c) => (
                   <ChordDiagram key={c.name + c.frets.join()} frets={c.frets} fingers={c.fingers} name={c.name} chord={c.id ? CHORDS[c.id] : undefined} size={112} leftHanded={leftHanded} />
+                ))}
+              </div>
+            </article>
+          )}
+
+          {parts.length >= 2 && (
+            <article className="tip card">
+              <h3>
+                <Icon name="repeat" /> Loop one part
+              </h3>
+              <p className="muted">
+                Stuck on a part? Loop it on its own. In Play mode the loop starts at {mode === 'play' && tempo < 1 ? Math.round(tempo * 100) : 70}% and speeds up a notch after every clean pass, until you nail it at full speed.
+              </p>
+              <div className="parts-list">
+                {parts.map((pt) => (
+                  <button key={pt.index} className="part-row" onClick={() => loopPart(pt.index)}>
+                    <Icon name="repeat" width={18} height={18} />
+                    <strong>{pt.name}</strong>
+                    <span className="faint small">{pt.bars} bars</span>
+                    <Icon name="next" width={16} height={16} />
+                  </button>
                 ))}
               </div>
             </article>

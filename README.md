@@ -2,7 +2,7 @@
 
 **Forge your sound.** A guitar learning game for rock, pop-punk and metal. It listens to you play through your microphone, scores every note, and takes you from your first open string to full songs with a band.
 
-Everything is original: the venues, the art, the lessons and all 31 songs were written for Fretforge.
+Everything is original: the venues, the art, the lessons and all 41 songs were written for Fretforge.
 
 ## Play it
 
@@ -25,7 +25,7 @@ Everything is original: the venues, the art, the lessons and all 31 songs were w
 
 ## The tour
 
-Nine venues, from the garage to the main stage. Each one ends with a gig: an original song you play with a synthesized band.
+Ten venues, from the garage to the main stage. Each one ends with a gig: an original song you play with a synthesized band.
 
 | Stop | Venue | You learn |
 | --- | --- | --- |
@@ -37,13 +37,14 @@ Nine venues, from the garage to the main stage. Each one ends with a gig: an ori
 | 6 | The Furnace | Metal rhythm: chugs, the gallop, the chromatic crawl, down-picking stamina |
 | 7 | The Theater | Lead guitar: the minor pentatonic, hammer-ons, pull-offs, slides, bends, licks |
 | 8 | The Arena | Alternate picking, tremolo picking, Drop D, syncopation |
-| 9 | Main Stage | Four encore songs that put it all together |
+| 9 | The Studio | Barre chords (E and A shapes, major and minor), the chuck, sus chords, pop-punk with barres. Opens after the Campfire |
+| 10 | Main Stage | Four encore songs that put it all together |
 
 ## Free play
 
 Don't feel like following the tour? The **Free play** tab opens every song straight away.
 
-- **Songs:** 19 songbook songs plus the 12 tour gigs, in pop-punk, punk, rock, blues, metal and acoustic, from level 1 (first weeks) to 5. Filter by style and level, search, and sort.
+- **Songs:** 28 songbook songs plus the 13 tour gigs, in pop-punk, punk, rock, blues, metal and acoustic, from level 1 (first weeks) to 5. Filter by style and level, search, and sort.
 - **Riffs:** the short riffs from the tour, always open.
 - **My tabs:** paste a tab or chord sheet you found online and play it on the highway with drums and scoring. Six-line ASCII tab (with bar lines, hammer-ons, pull-offs, slides, bends, palm-mute lines, repeats, capo and tuning notes) and lines of chord names both work. Tab doesn't say how long notes last, so the rhythm is a best guess: start in Practice mode.
 
@@ -58,7 +59,20 @@ Don't feel like following the tour? The **Free play** tab opens every song strai
 - **Listen:** hear and watch how it goes before you try it.
 - **Speed:** 50%, 70%, 85% or 100% of the song tempo.
 
-Walkthroughs teach a new idea step by step and listen while you try it. Drills (like one-minute chord changes) build speed. XP, ten ranks from Rookie to Fretforge Legend, a daily goal, a streak and 19 achievements keep you coming back.
+Walkthroughs teach a new idea step by step and listen while you try it. Drills (like one-minute chord changes) build speed. XP, ten ranks from Rookie to Fretforge Legend, a daily goal, a streak and 20 achievements keep you coming back.
+
+### Loop one part
+
+Stuck on a chorus? Every song and exercise lists its parts under **Loop one part**. The part plays on repeat; in Play mode it starts at 70%, speeds up 5% after every clean pass (90% or better) and slows down again if a pass goes badly, until you nail it at full speed. The coach's notes after a run offer a **Loop it** button for your toughest part.
+
+### Training
+
+The **Training** tab is the practice room:
+
+- **Today's workout:** a fresh five-step plan every day (tune, warm up, a training game, the next lesson, a song for fun), built from where you are on the tour. Steps tick off by themselves.
+- **Note Finder:** a note name appears, find it on the string and play it. Five levels, from the low E string to the whole neck.
+- **Echo:** ear training. Fretforge plays a note, you find it on your guitar.
+- **Metronome:** tap tempo, beats per bar, subdivisions and a speed trainer that ramps up by itself.
 
 ### Tools
 
@@ -82,6 +96,7 @@ Fretforge runs entirely in your browser. Microphone audio is analysed on your de
 
 The version is shown at the bottom of **Settings** and **Profile** (with the build). Bump `version` in `package.json` for every release.
 
+- **1.2.0:** Loop trainer, Training tab (today's workout, Note Finder, Echo, metronome), a new tour stop (The Studio: barre chords), 9 new songs, 8 new barre chord shapes and a streak achievement fix.
 - **1.1.0:** Free play with 19 new songs, My tabs (paste tabs and chord sheets) and GitHub gist sync.
 - **1.0.0:** the tour: nine venues, 56 lessons, 12 songs, tuner and chord library.
 

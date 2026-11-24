@@ -69,6 +69,7 @@ export function Results({
           .filter((p) => p.accuracy < 0.8 && p.total >= 4)
           .sort((a, b) => a.accuracy - b.accuracy)
           .slice(0, 2);
+  const partIndex = (name: string) => (lesson.sections ?? []).findIndex((s, i) => (s.name ?? `Part ${i + 1}`) === name);
   const adviceShown = advice.slice(0, Math.max(1, 3 - trouble.length));
 
   return (
@@ -125,7 +126,12 @@ export function Results({
                   {trouble.map((t, i) =>
                     i === 0 ? (
                       <li key={t.name}>
-                        The <strong>{t.name}</strong> was the toughest part ({Math.round(t.accuracy * 100)}%). Loop it in Practice mode.
+                        The <strong>{t.name}</strong> was the toughest part ({Math.round(t.accuracy * 100)}%).
+                        {partIndex(t.name) >= 0 && (
+                          <button className="btn btn-sm advice-action" onClick={() => navigate(`/play/${lesson.id}?mode=play&tempo=0.7&loop=${partIndex(t.name)}`, { replace: true })}>
+                            <Icon name="repeat" /> Loop it
+                          </button>
+                        )}
                       </li>
                     ) : (
                       <li key={t.name}>

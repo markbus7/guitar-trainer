@@ -64,6 +64,12 @@ export function performChart(chart: Chart, opts: PerformOptions): PlayedNote[] {
         });
       });
       prevMidi = undefined;
+    } else if (n.kind === 'mute') {
+      // A chuck: fretting hand relaxed, a short dead strum across the strings.
+      [40, 45, 50, 55, 59].forEach((midi, idx) => {
+        out.push({ t: t + idx * 0.006, midi, dur: 0.04, mute: true, string: (6 - idx) as 1 | 2 | 3 | 4 | 5 | 6, velocity: 0.6 + rng() * 0.2 });
+      });
+      prevMidi = undefined;
     }
   }
   return out;

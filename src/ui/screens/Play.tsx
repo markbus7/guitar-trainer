@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getEngine, unlockAudio } from '../../audio/engine';
 import { mic } from '../../audio/mic';
-import { findLesson, getLesson } from '../../content/curriculum';
+import { findLesson, getLesson, partLesson } from '../../content/curriculum';
 import type { ChartNote } from '../../game/chart';
 import type { RunOutcome } from '../../game/progression';
 import { GameSession, type Hud, type SessionMode, type SessionResult, type SessionState } from '../../game/session';
@@ -17,6 +17,7 @@ import { LevelMeter, MicPanel } from '../components/MicPanel';
 import { useMicStatus } from '../hooks';
 import { goBack, navigate } from '../router';
 import { toast } from '../toasts';
+import { LoopResult } from './LoopResult';
 import { Results } from './Results';
 
 interface Finished {
@@ -24,14 +25,19 @@ interface Finished {
   outcome: RunOutcome | null;
 }
 
-export function PlayScreen({ lessonId, mode, tempo }: { lessonId: string; mode: SessionMode; tempo: number }) {
-  const lesson = useMemo(() => {
+export function PlayScreen({ lessonId, mode, tempo, loop, ramp = true }: { lessonId: string; mode: SessionMode; tempo: number; loop?: number; ramp?: boolean }) {
+  const fullLesson = useMemo(() => {
     try {
       return getLesson(lessonId);
     } catch {
       return null;
     }
   }, [lessonId]);
+  // Loop trainer: just one part of the song, over and over.
+  const part = useMemo(() => (fullLesson && loop !== undefined ? partLesson(fullLesson, loop) : null), [fullLesson, loop]);
+  const looping = !!part;
+  const lesson = part ?? fullLesson;
+  const partName = part ? (fullLesson?.sections?.[loop!]?.name ?? `Part ${loop! + 1}`) : null;
   const [run, setRun] = useState(0);
   const [session, setSession] = useState<GameSession | null>(null);
   const [state, setState] = useState<SessionState>('ready');
@@ -63,7 +69,7 @@ export function PlayScreen({ lessonId, mode, tempo }: { lessonId: string; mode: 
         let outcome: RunOutcome | null = null;
         const progress = useProgress.getState();
         progress.addTime(s.takePracticeSeconds());
-        if (result.mode !== 'listen') {
+        if (result.mode !== 'listen' && !looping) {
           outcome = progress.record({
             lessonId: lesson.id,
             mode: result.mode === 'practice' ? 'practice' : 'play',
@@ -77,7 +83,7 @@ export function PlayScreen({ lessonId, mode, tempo }: { lessonId: string; mode: 
           for (const a of outcome.unlocked) toast({ tone: 'achievement', title: a.title, body: a.description });
           if (outcome.rankUp) toast({ tone: 'achievement', icon: 'bolt', title: `New rank: ${outcome.rankUp.title}`, body: 'Keep forging.' });
         }
-        setTimeout(() => setFinished({ result, outcome }), 900);
+        setTimeout(() => setFinished({ result, outcome }), looping ? 500 : 900);
       }),
     ];
 
@@ -197,9 +203,12 @@ export function PlayScreen({ lessonId, mode, tempo }: { lessonId: string; mode: 
         </button>
         <div className="play-title">
           <span className="eyebrow">
-            {mode === 'practice' ? 'Practice' : mode === 'listen' ? 'Listening' : 'Live'} · {Math.round(tempo * 100)}%
+            {looping ? 'Loop' : mode === 'practice' ? 'Practice' : mode === 'listen' ? 'Listening' : 'Live'} · {Math.round(tempo * 100)}%
           </span>
-          <strong>{lesson.title}</strong>
+          <strong>
+            {lesson.title}
+            {partName && <span className="faint"> · {partName}</span>}
+          </strong>
           <ProgressLine session={session} initial={progress} />
         </div>
         {mode !== 'listen' && hud && (
@@ -307,7 +316,18 @@ export function PlayScreen({ lessonId, mode, tempo }: { lessonId: string; mode: 
       </footer>
       <p className="rotate-hint faint">Tip: turn your phone sideways for a bigger highway.</p>
 
-      {finished && (
+      {finished && looping && (
+        <LoopResult
+          lessonId={lesson.id}
+          part={loop!}
+          partName={partName ?? ''}
+          mode={mode}
+          result={finished.result}
+          ramp={ramp}
+          onAgain={restart}
+        />
+      )}
+      {finished && !looping && (
         <Results
           lesson={lesson}
           result={finished.result}

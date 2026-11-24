@@ -105,6 +105,26 @@ const SHAPES: ChordShape[] = [
     barre: { fret: 3, from: 5, to: 1, finger: 1 } },
   { id: 'C#m', name: 'C♯m', frets: [O, 4, 6, 6, 5, 4], fingers: [O, 1, 3, 4, 2, 1], category: 'barre', level: 3,
     barre: { fret: 4, from: 5, to: 1, finger: 1 } },
+  // Movable shapes up the neck: the E shape (root on the low E) and the A shape (root on the A).
+  { id: 'F#', name: 'F♯', frets: [2, 4, 4, 3, 2, 2], fingers: [1, 3, 4, 2, 1, 1], category: 'barre', level: 3,
+    barre: { fret: 2, from: 6, to: 1, finger: 1 } },
+  { id: 'G-barre', name: 'G', frets: [3, 5, 5, 4, 3, 3], fingers: [1, 3, 4, 2, 1, 1], category: 'barre', level: 3,
+    barre: { fret: 3, from: 6, to: 1, finger: 1 },
+    tip: 'The F shape slid up two frets. Same grip, new chord: that is the magic of barre chords.' },
+  { id: 'A-barre', name: 'A', frets: [5, 7, 7, 6, 5, 5], fingers: [1, 3, 4, 2, 1, 1], category: 'barre', level: 3,
+    barre: { fret: 5, from: 6, to: 1, finger: 1 } },
+  { id: 'Am-barre', name: 'Am', frets: [5, 7, 7, 5, 5, 5], fingers: [1, 3, 4, 1, 1, 1], category: 'barre', level: 3,
+    barre: { fret: 5, from: 6, to: 1, finger: 1 },
+    tip: 'Minor E shape: lift your middle finger and let the barre do the work on the G string.' },
+  { id: 'C-barre', name: 'C', frets: [O, 3, 5, 5, 5, 3], fingers: [O, 1, 2, 3, 4, 1], category: 'barre', level: 3,
+    barre: { fret: 3, from: 5, to: 1, finger: 1 },
+    tip: 'A shape with the root on the A string. Many players flatten the ring finger across three strings instead.' },
+  { id: 'D-barre', name: 'D', frets: [O, 5, 7, 7, 7, 5], fingers: [O, 1, 2, 3, 4, 1], category: 'barre', level: 3,
+    barre: { fret: 5, from: 5, to: 1, finger: 1 } },
+  { id: 'Dm-barre', name: 'Dm', frets: [O, 5, 7, 7, 6, 5], fingers: [O, 1, 3, 4, 2, 1], category: 'barre', level: 3,
+    barre: { fret: 5, from: 5, to: 1, finger: 1 } },
+  { id: 'Em-barre', name: 'Em', frets: [O, 7, 9, 9, 8, 7], fingers: [O, 1, 3, 4, 2, 1], category: 'barre', level: 3,
+    barre: { fret: 7, from: 5, to: 1, finger: 1 } },
 ];
 
 export const CHORDS: Record<string, ChordShape> = Object.fromEntries(SHAPES.map((s) => [s.id, s]));
