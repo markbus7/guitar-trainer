@@ -74,7 +74,7 @@ describe('progression', () => {
 
   it('counts practice streaks across days', () => {
     let p = EMPTY_PROGRESS;
-    for (let d = 0; d < 4; d++) p = addPracticeTime(p, 300, NOW - d * DAY).next;
+    for (let d = 3; d >= 0; d--) p = addPracticeTime(p, 300, NOW - d * DAY).next;
     expect(streakDays(p.days, NOW)).toBe(4);
     // Nothing yet today: the streak from yesterday still counts.
     expect(streakDays(p.days, NOW + DAY)).toBe(4);

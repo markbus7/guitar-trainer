@@ -7,11 +7,15 @@ import { furnace } from './chapters/06-furnace';
 import { theater } from './chapters/07-theater';
 import { arena } from './chapters/08-arena';
 import { mainstage } from './chapters/09-mainstage';
+import { studio } from './chapters/10-studio';
 import { SONGBOOK } from './songbook';
 import type { Chapter, Lesson } from './types';
 
-/** The tour: nine stops from the garage to the main stage. */
-export const CHAPTERS: Chapter[] = [garage, basement, divebar, skatepark, campfire, furnace, theater, arena, mainstage];
+/**
+ * The tour: ten stops from the garage to the main stage. The Studio (barre chords) opens
+ * after the Campfire, so it never blocks the metal and lead stops.
+ */
+export const CHAPTERS: Chapter[] = [garage, basement, divebar, skatepark, campfire, furnace, theater, arena, studio, mainstage];
 
 /** Every lesson on the tour, in order. */
 export const ALL_LESSONS: Lesson[] = CHAPTERS.flatMap((c) => c.lessons);
@@ -102,4 +106,28 @@ export function isPlayable(lesson: Lesson) {
 /** Most stars a lesson can award. */
 export function maxStars(lesson: Lesson) {
   return isPlayable(lesson) ? 3 : 1;
+}
+
+/** The distinct parts of a song (a chorus that comes back three times is listed once). */
+export function lessonParts(lesson: Lesson): { index: number; name: string; bars: number }[] {
+  const seen = new Set<string>();
+  const parts: { index: number; name: string; bars: number }[] = [];
+  (lesson.sections ?? []).forEach((sec, index) => {
+    const key = `${sec.name ?? ''}|${sec.tab.replace(/\s+/g, ' ').trim()}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    const bars = (sec.tab.match(/\|/g) ?? []).length * (sec.repeat ?? 1);
+    parts.push({ index, name: sec.name ?? `Part ${index + 1}`, bars });
+  });
+  return parts;
+}
+
+/**
+ * One part of a lesson on its own, for the loop trainer. Long repeats are cut to two
+ * so a loop stays short enough to repeat many times.
+ */
+export function partLesson(lesson: Lesson, index: number): Lesson | null {
+  const sec = lesson.sections?.[index];
+  if (!sec) return null;
+  return { ...lesson, sections: [{ ...sec, repeat: Math.min(sec.repeat ?? 1, 2), crash: true, fill: false }] };
 }

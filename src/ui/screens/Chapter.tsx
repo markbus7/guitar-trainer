@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CHAPTERS, getChapter, isPlayable, maxStars } from '../../content/curriculum';
 import type { Lesson } from '../../content/types';
 import { TUNINGS } from '../../music/notes';
-import { chapterStars, isChapterUnlocked, isLessonUnlocked, lessonStars } from '../../game/progression';
+import { chapterUnlockLesson, chapterStars, isChapterUnlocked, isLessonUnlocked, lessonStars } from '../../game/progression';
 import { progressData, useProgress } from '../../state/progress';
 import { useSettings } from '../../state/settings';
 import { VenueArt } from '../art/VenueArt';
@@ -50,7 +50,7 @@ export function ChapterScreen({ id }: { id: string }) {
             <span className="chip">{chapter.lessons.length} lessons</span>
             {!chapterOpen && (
               <span className="chip">
-                <Icon name="lock" /> Locked
+                <Icon name="lock" /> Opens after “{chapterUnlockLesson(index).title}”
               </span>
             )}
           </div>

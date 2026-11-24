@@ -11,6 +11,7 @@ export const mainstage: Chapter = {
   blurb: 'Full songs that mix everything you have learned. The crowd is waiting.',
   accent: '#ffe08a',
   art: 'mainstage',
+  unlockAfter: 'arena-gig',
   lessons: [
     {
       id: 'stage-thunder-lane',

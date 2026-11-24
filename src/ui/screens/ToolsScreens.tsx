@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useDaily } from '../../state/daily';
 import { getEngine, unlockAudio } from '../../audio/engine';
 import { CHORD_LIST, chordMidis, shapeNotes, type ChordShape } from '../../music/chords';
 import { TUNINGS, fretMidi, type TuningId } from '../../music/notes';
@@ -13,6 +14,11 @@ import { useListenFor } from '../listen';
 
 export function TunerScreen() {
   const [tuning, setTuning] = useState<TuningId>('standard');
+  // A few seconds with the tuner open ticks off the "tune up" step of today's workout.
+  useEffect(() => {
+    const id = setTimeout(() => useDaily.getState().markTuned(), 8000);
+    return () => clearTimeout(id);
+  }, []);
   return (
     <div className="page tuner-page">
       <div className="page-head">

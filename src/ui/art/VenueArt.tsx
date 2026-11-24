@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { VenueArt as VenueId } from '../../content/types';
 
 /**
- * Illustrated scenes for the nine tour stops. Flat, layered silhouettes lit by each
+ * Illustrated scenes for the ten tour stops. Flat, layered silhouettes lit by each
  * venue's accent colour. viewBox 400×200, cropped to fill whatever box they sit in.
  */
 export function VenueArt({ art, accent, className, locked }: { art: VenueId; accent: string; className?: string; locked?: boolean }) {
@@ -232,6 +232,60 @@ const SCENES: Record<VenueId, (id: string, accent: string) => ReactNode> = {
         <circle key={x} cx={x} cy={26} r="6" fill="#e6f6ff" />
       ))}
       {crowd(172, '#04060b', 5)}
+    </>
+  ),
+  studio: (id, a) => (
+    <>
+      <rect width="400" height="200" fill="#100d14" />
+      {/* Acoustic panels on the back wall */}
+      {Array.from({ length: 8 }, (_, c) =>
+        Array.from({ length: 3 }, (_, r) => (
+          <rect key={`${r}-${c}`} x={6 + c * 50} y={6 + r * 30} width="44" height="26" rx="3" fill="#1d1824" opacity={0.75 + ((r + c) % 3) * 0.08} />
+        )),
+      )}
+      <rect width="400" height="200" fill={`url(#${id}-sky)`} opacity="0.55" />
+      {/* The glass into the live room, with an amp and a guitar on a stand */}
+      <rect x="110" y="28" width="180" height="92" rx="6" fill="#0b0910" stroke="#2c2433" strokeWidth="5" />
+      <rect x="114" y="32" width="172" height="84" rx="3" fill={`url(#${id}-glow)`} opacity="0.35" />
+      <path d="M126 40l40 0-60 70z" fill="#fff" opacity="0.04" />
+      <rect x="148" y="74" width="46" height="42" rx="3" fill="#120e16" stroke={a} strokeOpacity="0.45" />
+      <rect x="152" y="78" width="38" height="8" rx="2" fill="#2a2232" />
+      {[0, 1, 2, 3].map((i) => (
+        <circle key={i} cx={157 + i * 9} cy={82} r="1.6" fill={a} opacity="0.8" />
+      ))}
+      <path d="M236 116l6-46h4l-2 46z" fill="#120e16" />
+      <ellipse cx="243" cy="104" rx="11" ry="12" fill="#120e16" />
+      <path d="M226 116l17-12 17 12" stroke="#120e16" strokeWidth="3" fill="none" />
+      {/* REC light */}
+      <rect x="182" y="10" width="36" height="14" rx="7" fill="#2a0d12" stroke="#ff3d5a" strokeOpacity="0.7" />
+      <circle cx="191" cy="17" r="3" fill="#ff3d5a" />
+      <circle cx="191" cy="17" r="9" fill="#ff3d5a" opacity="0.25" filter={`url(#${id}-blur)`} />
+      <text x="208" y="20.5" textAnchor="middle" fontFamily="Oswald Variable, sans-serif" fontSize="9" fontWeight="700" fill="#ffb3bf">
+        REC
+      </text>
+      {/* Monitor speakers */}
+      {[46, 330].map((x) => (
+        <g key={x}>
+          <rect x={x} y="64" width="30" height="46" rx="4" fill="#0d0b11" />
+          <circle cx={x + 15} cy="77" r="5" fill="#1d1824" />
+          <circle cx={x + 15} cy="96" r="10" fill="#1d1824" stroke={a} strokeOpacity="0.35" />
+        </g>
+      ))}
+      {/* The mixing desk */}
+      <path d="M0 200V150l40-18h320l40 18v50z" fill="#16121b" />
+      <path d="M40 132h320l40 18H0z" fill="#221c29" />
+      {Array.from({ length: 24 }, (_, i) => {
+        const x = 52 + i * 12.4;
+        const level = 6 + ((i * 7) % 11);
+        return (
+          <g key={i}>
+            <line x1={x} x2={x} y1="158" y2="190" stroke="#0b0910" strokeWidth="3" strokeLinecap="round" />
+            <rect x={x - 3.5} y={190 - level * 2.2} width="7" height="4" rx="1" fill={i % 6 === 0 ? a : '#c9c0b8'} />
+            <circle cx={x} cy="140" r="2.2" fill={i % 4 === 0 ? a : '#4a4152'} opacity="0.9" />
+          </g>
+        );
+      })}
+      <rect x="0" y="196" width="400" height="4" fill={a} opacity="0.25" />
     </>
   ),
   mainstage: (id, a) => (

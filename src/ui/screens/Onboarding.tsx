@@ -35,7 +35,7 @@ export function Onboarding() {
       </p>
       <ul className="ob-points">
         <li>
-          <Icon name="map" /> A tour of nine venues, from the garage to the main stage
+          <Icon name="map" /> A tour of ten venues, from the garage to the main stage
         </li>
         <li>
           <Icon name="flame" /> 13 original songs and dozens of riffs

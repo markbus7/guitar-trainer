@@ -4,6 +4,7 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/oswald';
 import './styles/base.css';
 import './styles/app.css';
+import './styles/training.css';
 import { App } from './ui/App';
 
 createRoot(document.getElementById('root')!).render(

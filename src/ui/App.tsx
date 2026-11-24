@@ -24,14 +24,17 @@ import { Onboarding } from './screens/Onboarding';
 import { PlayScreen } from './screens/Play';
 import { ProfileScreen } from './screens/Profile';
 import { SettingsScreen } from './screens/Settings';
+import { MetronomeScreen } from './screens/Metronome';
 import { ChordsScreen, TunerScreen } from './screens/ToolsScreens';
+import { TrainerScreen } from './screens/Trainer';
+import { TrainingScreen } from './screens/Training';
 import { Toasts } from './toasts';
 
 const NAV: { path: string; icon: IconName; label: string; match: string[] }[] = [
   { path: '/', icon: 'map', label: 'Tour', match: ['', 'chapter', 'lesson'] },
   { path: '/songs', icon: 'disc', label: 'Free play', match: ['songs'] },
+  { path: '/training', icon: 'bolt', label: 'Training', match: ['training', 'metronome', 'chords'] },
   { path: '/tuner', icon: 'tuner', label: 'Tuner', match: ['tuner'] },
-  { path: '/chords', icon: 'chords', label: 'Chords', match: ['chords'] },
   { path: '/profile', icon: 'user', label: 'Profile', match: ['profile'] },
   { path: '/settings', icon: 'settings', label: 'Settings', match: ['settings'] },
 ];
@@ -95,11 +98,29 @@ export function App() {
       case 'play': {
         const mode = (route.query.get('mode') as SessionMode) || 'play';
         const tempo = Math.max(0.4, Math.min(1.2, Number(route.query.get('tempo')) || 1));
-        screen = <PlayScreen key={`${id}-${mode}-${tempo}`} lessonId={id ?? ''} mode={['play', 'practice', 'listen'].includes(mode) ? mode : 'play'} tempo={tempo} />;
+        const loopRaw = route.query.get('loop');
+        const loop = loopRaw !== null && /^\d+$/.test(loopRaw) ? Number(loopRaw) : undefined;
+        screen = (
+          <PlayScreen
+            key={`${id}-${mode}-${tempo}-${loop ?? ''}`}
+            lessonId={id ?? ''}
+            mode={['play', 'practice', 'listen'].includes(mode) ? mode : 'play'}
+            tempo={tempo}
+            loop={loop}
+            ramp={route.query.get('ramp') !== '0'}
+          />
+        );
         break;
       }
       case 'songs':
         screen = id === 'new' ? <ImportTabScreen /> : id === 'edit' ? <ImportTabScreen key={route.parts[2]} editId={route.parts[2] ?? ''} /> : <FreePlayScreen />;
+        break;
+      case 'training':
+        screen =
+          id === 'notes' || id === 'ear' ? <TrainerScreen key={route.path} game={id} levelId={route.parts[2]} /> : <TrainingScreen />;
+        break;
+      case 'metronome':
+        screen = <MetronomeScreen />;
         break;
       case 'tuner':
         screen = <TunerScreen />;
